@@ -1,47 +1,68 @@
-
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.util.LinkedList;
 import java.util.Queue;
-import java.util.StringTokenizer;
 
 public class Main {
-    static final int[][] d = {{0,1},{0,-1},{1,0},{-1,0}};
+
+    private static final int[][] direction = {{0, 1}, {1, 0}, {0, -1}, {-1, 0}};
 
     public static void main(String[] args) throws Exception {
         BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
-        StringTokenizer st = new StringTokenizer(br.readLine());
-        int N = Integer.parseInt(st.nextToken());
-        int M = Integer.parseInt(st.nextToken());
-        int[][] maze = new int[N][M];
-        boolean[][] visited = new boolean[N][M];
+        String[] input = br.readLine().split(" ");
+        int N = stoi(input[0]);
+        int M = stoi(input[1]);
+        boolean[][] maze = new boolean[N][M];
         for (int i = 0; i < N; i++) {
-            String[] row = br.readLine().split("");
+            char[] chars = br.readLine().toCharArray();
             for (int j = 0; j < M; j++) {
-                maze[i][j] = Integer.parseInt(row[j]);
+                maze[i][j] = chars[j] == '1';
             }
         }
 
-        // bfs
-        int cnt = 0;
+        int count = bfs(N, M, maze);
+        System.out.println(count);
+    }
+
+    private static int bfs(int n, int m, boolean[][] maze) {
         Queue<int[]> queue = new LinkedList<>();
         queue.offer(new int[]{0, 0, 1});
-        while(!queue.isEmpty()){
-            int[] location = queue.poll();
-            int r = location[0];
-            int c = location[1];
-            cnt = location[2];
-            if(r>=N-1 && c>=M-1) break;
-            for(int[] dd : d){
-                int rr = r + dd[0];
-                int cc = c + dd[1];
-                if(rr >= 0 && cc >= 0 && rr < N && cc < M && !visited[rr][cc] && maze[rr][cc] == 1){
-                    visited[rr][cc] = true;
-                    queue.offer(new int[]{rr, cc, cnt+1});
+
+        while (!queue.isEmpty()) {
+            int[] poll = queue.poll();
+            int x = poll[0];
+            int y = poll[1];
+            int count = poll[2];
+
+            if (x == n - 1 && y == m - 1) {
+                return count;
+            }
+
+            if (isNotAvailable(n, m, maze, x, y)) {
+                continue;
+            }
+            maze[x][y] = false;
+
+            for (int[] d : direction) {
+                int dx = x + d[0];
+                int dy = y + d[1];
+
+                if (isNotAvailable(n, m, maze, dx, dy)) {
+                    continue;
                 }
+
+                queue.offer(new int[]{dx, dy, count + 1});
             }
         }
 
-        System.out.println(cnt);
+        return -1;
+    }
+
+    private static boolean isNotAvailable(int n, int m, boolean[][] maze, int x, int y) {
+        return x < 0 || x >= n || y < 0 || y >= m || !maze[x][y];
+    }
+
+    private static int stoi(String s) {
+        return Integer.parseInt(s);
     }
 }
